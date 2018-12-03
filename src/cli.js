@@ -102,6 +102,42 @@ let blink = function (host, port, times, rate, timeout) {
   });
 };
 
+let setBrightness = function(host, port, intensity, timeout) {
+  console.log(`Setting brightness=${intensity} command to ${host}:${port}...`);
+  client.getDevice({host, port}).then((device) => {
+    return device.lighting.setLightState({
+      brightness: parseInt(intensity),
+      sendOptions: {
+        timeout: timeout
+      }
+    }).then(() => {
+      device.lighting.getLightState().then((ls) => {
+        console.log('Brightness set\n', ls);
+      });
+    });
+  }).catch((reason) => {
+    outputError(reason);
+  });
+}
+
+let setOnOff = function(host, port, onOff, timeout) {
+  console.log(`Setting on_off=${onOff} command to ${host}:${port}...`);
+  client.getDevice({host, port}).then((device) => {
+    return device.lighting.setLightState({
+      on_off: parseInt(onOff),
+      sendOptions: {
+        timeout: timeout
+      }
+    }).then(() => {
+      device.lighting.getLightState().then((ls) => {
+        console.log('Bulb State:\n', ls);
+      });
+    });
+  }).catch((reason) => {
+    outputError(reason);
+  });
+}
+
 let toInt = (s) => {
   return parseInt(s);
 };
@@ -177,6 +213,30 @@ program
     client = setupClient();
     let [hostOnly, port] = host.split(':');
     blink(hostOnly, port, times, rate);
+  });
+
+program
+  .command('brightness <host> [intensity]')
+  .action(function (host, brightness = 100, options) {
+    client = setupClient();
+    let [hostOnly, port] = host.split(':');
+    setBrightness(hostOnly, port, brightness);
+  });
+
+program
+  .command('on <host>')
+  .action(function (host, brightness = 100, options) {
+    client = setupClient();
+    let [hostOnly, port] = host.split(':');
+    setOnOff(hostOnly, port, 1);
+  });
+
+program
+  .command('off <host>')
+  .action(function (host, brightness = 100, options) {
+    client = setupClient();
+    let [hostOnly, port] = host.split(':');
+    setOnOff(hostOnly, port, 0);
   });
 
 [ 'getSysInfo', 'getInfo', 'setAlias', 'getModel',
