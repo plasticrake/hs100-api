@@ -139,7 +139,10 @@ async function sendCommandDynamic(
     // collection of all call signatures and failing.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const func = device[command] as (...args: any) => Promise<any>;
-    const results = await func.apply(device, [...commandParams, { ...sendOptions }]);
+    const results = await func.apply(device, [
+      ...commandParams,
+      { ...sendOptions },
+    ]);
 
     console.log('response:');
     console.dir(results, { colors: program.opts().color === 'on', depth: 10 });
