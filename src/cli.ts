@@ -115,6 +115,7 @@ async function sendCommandDynamic(
   // eslint-disable-next-line @typescript-eslint/ban-types
   command: Exclude<keyof PickProperties<AnyDevice, Function>, undefined>,
   commandParams: Array<boolean | number | string> = [],
+  sendOptions: SendOptions,
   childId?: string
 ): Promise<void> {
   try {
@@ -122,11 +123,27 @@ async function sendCommandDynamic(
     console.log(
       `Sending ${command} command to ${host}:${port || ''} ${
         childId ? `childId: ${childId}` : ''
-      } via ${client.defaultSendOptions.transport}...`
+      } via ${
+        sendOptions && sendOptions.transport
+          ? sendOptions.transport
+          : client.defaultSendOptions.transport
+      }...`
     );
     const device = await client.getDevice({ host, port, childId });
-    // @ts-ignore: ignoring for now
-    const results = await device[command](...commandParams);
+
+    // This line gets "TypeError: Found non-callable @@iterator" error
+    // // @ts-ignore: ignoring for now
+    // const results = await device[command](...commandParams);
+
+    // Use (...args:any) typecast to pass the call-by-name that otherwise picks up
+    // collection of all call signatures and failing.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const func = device[command] as (...args: any) => Promise<any>;
+    const results = await func.apply(device, [
+      ...commandParams,
+      { ...sendOptions },
+    ]);
+
     console.log('response:');
     console.dir(results, { colors: program.opts().color === 'on', depth: 10 });
   } catch (err) {
@@ -312,7 +329,11 @@ program
 
 type CommandSetup = {
   name: Parameters<typeof sendCommandDynamic>[2];
-  params?: { name: string; type: 'boolean' | 'number' | 'string' }[];
+  params?: {
+    name: string;
+    type: 'boolean' | 'number' | 'string';
+    optional?: boolean;
+  }[];
   supportsChildId?: boolean;
   action?: (device: AnyDevice, ...args: unknown[]) => Promise<unknown>;
 };
@@ -320,11 +341,15 @@ type CommandSetup = {
 const commandSetup: CommandSetup[] = [
   { name: 'getSysInfo', supportsChildId: true },
   { name: 'getInfo', supportsChildId: true },
-  { name: 'setAlias', supportsChildId: true },
+  {
+    name: 'setAlias',
+    params: [{ name: 'alias', type: 'string' }],
+    supportsChildId: true,
+  },
   { name: 'getModel', supportsChildId: true },
   {
     name: 'setPowerState',
-    params: [{ name: 'state', type: 'boolean' }],
+    params: [{ name: 'state', type: 'boolean', optional: true }],
     supportsChildId: true,
   },
   {
@@ -340,7 +365,9 @@ const commandSetup: CommandSetup[] = [
 
 for (const command of commandSetup) {
   const paramsString = command.params
-    ? command.params.map((p) => `[${p.name}]`).join(' ')
+    ? command.params
+        .map((p) => (p.optional ? `[${p.name}]` : `<${p.name}>`))
+        .join(' ')
     : '';
 
   const cmd = program
@@ -353,27 +380,29 @@ for (const command of commandSetup) {
     cmd.option('-c, --childId [childId]', 'childId');
   }
 
-  cmd.action((host, paramsInput, optionsInput) => {
+  // From commander README:
+  // The action handler gets passed a parameter for each command-argument you
+  // declared, and two additional parameters which are the parsed options and
+  // the command object itself.
+  cmd.action((...paramsInput) => {
+    // To deal with arbitrary counbt of command-arguments, we take all into
+    // variadic paramsInput to sort out last two into optionsInput and
+    // (UNUSED) thisCommand:
+    const [optionsInput /* UNUSED: , thisCommand */] = paramsInput.splice(
+      paramsInput.length - 2
+    );
+    const host = paramsInput.shift();
     const [hostOnly, port] = host.split(':');
 
-    // paramsInput will be options when command has not params
-    let options;
-    let params;
-    if (optionsInput === undefined) {
-      options = paramsInput;
-      params = undefined;
-    } else {
-      options = optionsInput;
-      params = paramsInput;
-    }
-    const commandParams = setParamTypes(params, command);
-
+    const commandParams = setParamTypes(paramsInput, command);
+    const { childId, ...sendOptions } = optionsInput;
     sendCommandDynamic(
       hostOnly,
       port,
       command.name,
       commandParams,
-      options.childId
+      sendOptions,
+      childId
     );
   });
 }
