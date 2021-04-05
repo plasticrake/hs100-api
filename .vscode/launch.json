@@ -1,0 +1,43 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Launch Program",
+        "type": "node",
+        "program": "${workspaceFolder}/lib/cli.js",
+        "runtimeArgs": [
+          "--inspect"
+        ],
+        "args": [
+          "getSysInfo",
+          "10.0.0.127:65356",
+        ],
+        "request": "launch",
+        "skipFiles": [
+          "<node_internals>/**"
+        ],
+        "outputCapture": "std"
+      },
+      {
+        "name": "Launch JS via npm",
+        "type": "pwa-node",
+        "request": "launch",
+        "cwd": "${workspaceFolder}",
+        "runtimeExecutable": "npm",
+        "runtimeArgs": ["run-script", "debug-js"],
+        "outputCapture": "std"
+      }
+      {
+        "name": "Launch TS via npm",
+        "type": "pwa-node",
+        "request": "launch",
+        "cwd": "${workspaceFolder}",
+        "runtimeExecutable": "npm",
+        "runtimeArgs": ["run-script", "debug-ts"],
+        "outputCapture": "std"
+      }
+    ]
+}

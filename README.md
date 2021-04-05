@@ -57,6 +57,57 @@ For functions that send commands, the last argument is `SendOptions` where you c
 
 Functions that take more than 3 arguments are passed a single options object as the first argument (and if its a network command, SendOptions as the second.)
 
+## Developing / Debugging with VSCode
+
+Project is instrumented for debugging TypeScript source code, compiled JS code and can be installed for running from command line using CLI.
+
+Clone the project to your local disk:
+
+```bash
+git clone https://github.com/plasticrake/tplink-smarthome-api.git
+cd tplink-smarthome-api
+npm install
+```
+
+If you plan to submit a PR: fork the project on Github, create new branch for the PR, clone your fork to local disk and checkout your branch:
+
+```bash
+git clone https://gihub.com/<your_account>/tplink-smarthome-api.git
+cd tplink-smarthome-api
+git checkout <your PR branch>
+npm install
+```
+
+Execute `code .` in the \<project dir\> to start VSCode.
+
+### Debug TypeScript
+
+For fast debugging of TypeScript code, set breakpoints in src/**/*.ts files and use 'Launch TS via npm' configuration that calls `npm run debug-ts`. Actual command is defined in "scripts": "debug-ts" in 'package.json' file.
+
+To quickly jump through different commands replicate 'debug-tsNN' scripts with different commands. To debug them from integrated terminal:
+
+ - F1 (command palette) > Debug: Toggle Auto Attach > smart
+ - restart integrated terminal (click exclamation triangle in terminal top-right and restart)
+ - To skip certain node/npm commands, modify debug.javascript.autoAttachSmartPattern (defaults are pretty good)
+
+Then just type `npm run debug-tsNN` in the integrated terminal to start the program -  debugger will attach automatically.
+### Debug JS
+
+For debugging compiled JS code, after editing source code in src/\*\*/\*.ts, execute `npm run build` and `npm run debug-js` or 'F5' in VSCode to debug JS (choose 'Launch JS via npm'). Breakpoints should be set in lib/\*\*/\*.js files.
+
+### Command Line
+
+To install package for running from command-line, execute commands:
+
+```bash
+cd <project dir>
+npm install
+npm run build
+npm link
+tplink-smarthome-api help
+tplink-smarthome-api ...
+```
+
 ## Credits
 
 Thanks to George Georgovassilis and Thomas Baust for [figuring out the HS1XX encryption](https://blog.georgovassilis.com/2016/05/07/controlling-the-tp-link-hs100-wi-fi-smart-plug/).

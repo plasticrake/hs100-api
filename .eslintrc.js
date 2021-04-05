@@ -65,5 +65,33 @@ module.exports = {
         'import/no-unresolved': 'off',
       },
     },
+
+    {
+      files: ['lib/**/*.js'],
+      rules: {
+        // Many rules are violated by tsc output, which cannot be changed by tsc configs, or --fix by eslint.
+        // Disable or modify these rules:
+        'no-underscore-dangle': 'off',
+        'func-names': 'off',
+        'no-param-reassign': 'off',
+        camelcase: 'off',
+        'new-cap': 'off',
+        'no-unused-expressions': 'off',
+        'no-sequences': 'off',
+        'no-void': 'off',
+        'no-multi-assign': 'off',
+        'no-cond-assign': 'off',
+        'no-shadow': 'off',
+        'prefer-rest-params': 'off',
+      },
+    },
+
+    {
+      files: ['lib/**/*.ts'],
+      rules: {
+        '@typescript-eslint/ban-types': 'off',
+        '@typescript-eslint/no-shadow': 'off',
+      },
+    },
   ],
 };

@@ -1,0 +1,18 @@
+{
+    "recommendations": [
+        "rbbit.typescript-hero",
+        "steoates.autoimport",
+        "wix.vscode-import-cost",
+        "coenraads.bracket-pair-colorizer-2",
+        "editorconfig.editorconfig",
+        "dbaeumer.vscode-eslint",
+        "eamodio.gitlens",
+        "eg2.vscode-npm-script",
+        "christian-kohler.npm-intellisense",
+        "esbenp.prettier-vscode",
+        "gruntfuggly.todo-tree",
+        "pflannery.vscode-versionlens",
+        "visualstudioexptteam.vscodeintellicode",
+        "vscode-icons-team.vscode-icons"
+    ]
+}
